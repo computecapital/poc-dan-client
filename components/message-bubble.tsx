@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { FileText, Music, Play, Download } from "lucide-react";
 import { useState } from "react";
-import { getAuthFromUrl } from "@/lib/auth";
+import { getAccessToken } from "@/lib/auth";
 
 interface Attachment {
   id: string;
@@ -131,10 +131,8 @@ export function MessageBubble({
 
 function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const auth = getAuthFromUrl();
-  const fileUrl = `/api/proxy/files/${
-    attachment.path
-  }?auth=${encodeURIComponent(auth || "")}`;
+  const token = getAccessToken();
+  const fileUrl = `/api/proxy/files/${attachment.path}?token=${token}`;
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return "0:00";
