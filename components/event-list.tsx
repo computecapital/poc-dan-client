@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { getSocket } from "@/lib/socket"
+import { api } from "@/lib/api"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -88,9 +89,8 @@ export function EventList({ groupId }: EventListProps) {
   const fetchEvents = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/groups/${groupId}/events?limit=100`)
-      const data = await response.json()
-      setEvents(data.data || [])
+      const resp = await api.get(`/groups/${groupId}/events`, { params: { limit: 100 } })
+      setEvents(resp.data.data || [])
     } catch (error) {
       console.error("[v0] Error fetching events:", error)
     } finally {

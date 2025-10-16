@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Search, MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getSocket } from "@/lib/socket"
+import { api } from "@/lib/api"
 
 interface Group {
   id: string
@@ -75,9 +76,8 @@ export function ConversationList({ selectedGroupId, onSelectGroup }: Conversatio
       const params = new URLSearchParams({ limit: "50" })
       if (search) params.append("search", search)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/groups?${params}`)
-      const data = await response.json()
-      setGroups(data.data || [])
+      const resp = await api.get(`/groups`, { params: Object.fromEntries(params.entries()) })
+      setGroups(resp.data.data || [])
     } catch (error) {
       console.error("[v0] Error fetching groups:", error)
     } finally {

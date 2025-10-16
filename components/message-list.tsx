@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getSocket } from "@/lib/socket";
+import { api } from "@/lib/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageBubble } from "@/components/message-bubble";
 import { Loader2 } from "lucide-react";
@@ -58,10 +59,10 @@ export function MessageList({ groupId }: MessageListProps) {
     async (pageNum: number, scrollToBottom: boolean) => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/groups/${groupId}/messages?page=${pageNum}&limit=50`
-        );
-        const data = await response.json();
+        const resp = await api.get(`/groups/${groupId}/messages`, {
+          params: { page: pageNum, limit: 50 },
+        });
+        const data = resp.data;
 
         const received = (data.data || []) as Message[];
         const normalized = [...received].reverse(); // garantir mais antigo -> mais novo

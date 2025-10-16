@@ -7,6 +7,7 @@ import { MessageSquare, Calendar } from "lucide-react"
 import { MessageList } from "@/components/message-list"
 import { EventList } from "@/components/event-list"
 import { getSocket } from "@/lib/socket"
+import { api } from "@/lib/api"
 
 interface Group {
   id: string
@@ -32,9 +33,8 @@ export function ChatView({ groupId }: ChatViewProps) {
 
     try {
       setLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/groups/${groupId}`)
-      const data = await response.json()
-      setGroup(data)
+      const resp = await api.get(`/groups/${groupId}`)
+      setGroup(resp.data)
     } catch (error) {
       console.error("[v0] Error fetching group:", error)
     } finally {
