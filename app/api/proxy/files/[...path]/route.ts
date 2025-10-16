@@ -1,13 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-
 export async function GET(
-  req: NextRequest,
+  req: Request,
   { params }: { params: { path: string[] } }
 ) {
-  const auth = req.nextUrl.searchParams.get("auth");
+  const auth = new URL(req.url).searchParams.get("auth");
   const upstream = process.env.NEXT_PUBLIC_API_URL;
   if (!upstream) {
-    return new NextResponse("Missing NEXT_PUBLIC_API_URL", { status: 500 });
+    return new Response("Missing NEXT_PUBLIC_API_URL", { status: 500 });
   }
 
   const resourcePath = params.path.join("/");
@@ -25,7 +23,7 @@ export async function GET(
   headers.delete("content-security-policy");
   headers.delete("x-frame-options");
 
-  return new NextResponse(resp.body, {
+  return new Response(resp.body, {
     status: resp.status,
     headers,
   });
