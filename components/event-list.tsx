@@ -72,14 +72,13 @@ export function EventList({ groupId }: EventListProps) {
 
   useEffect(() => {
     const socket = getSocket()
-    const handleEventCreated = (event: Event) => {
+
+    const handleEventCreated = async (event: Event) => {
       if (event.groupId !== groupId) return
-      setEvents((prev) => {
-        if (prev.some((e) => e.id === event.id)) return prev
-        // Inserir no topo para realçar novidade sem recarregar tudo
-        return [event, ...prev]
-      })
+      const resp = await api.get(`/groups/${groupId}/events`, { params: { limit: 100 } })
+      setEvents(resp.data.data || [])
     }
+
     socket.on("event:created", handleEventCreated)
     return () => {
       socket.off("event:created", handleEventCreated)

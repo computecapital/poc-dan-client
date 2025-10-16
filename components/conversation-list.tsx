@@ -37,8 +37,9 @@ export function ConversationList({ selectedGroupId, onSelectGroup }: Conversatio
   useEffect(() => {
     const socket = getSocket()
 
-    const handleGroupCreated = () => {
-      fetchGroups();
+    const handleGroupCreated = async () => {
+      const resp = await api.get(`/groups`, { params: { limit: "50", search } })
+      setGroups(resp.data.data || [])
     }
 
     const handleMessageCreated = (payload: { groupId: string }) => {
@@ -69,10 +70,8 @@ export function ConversationList({ selectedGroupId, onSelectGroup }: Conversatio
   const fetchGroups = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({ limit: "50" })
-      if (search) params.append("search", search)
 
-      const resp = await api.get(`/groups`, { params: Object.fromEntries(params.entries()) })
+      const resp = await api.get(`/groups`, { params: { limit: "50", search } })
       setGroups(resp.data.data || [])
     } catch (error) {
       console.error("[v0] Error fetching groups:", error)
