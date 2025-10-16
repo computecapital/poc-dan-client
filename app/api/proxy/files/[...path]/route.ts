@@ -1,6 +1,6 @@
 export async function GET(
   req: Request,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Record<string, string | string[]> }
 ) {
   const auth = new URL(req.url).searchParams.get("auth");
   const upstream = process.env.NEXT_PUBLIC_API_URL;
@@ -8,7 +8,7 @@ export async function GET(
     return new Response("Missing NEXT_PUBLIC_API_URL", { status: 500 });
   }
 
-  const resourcePath = params.path.join("/");
+  const resourcePath = Array.isArray(params.path) ? params.path.join("/") : params.path;
   const url = `${upstream}/files/${resourcePath}`;
 
   const resp = await fetch(url, {

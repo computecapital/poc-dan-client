@@ -1,45 +1,49 @@
-"use client"
+"use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
-import { FileText, Music, Play, Download } from "lucide-react"
-import { useState } from "react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+import { FileText, Music, Play, Download } from "lucide-react";
+import { useState } from "react";
+import { getAuthFromUrl } from "@/lib/auth";
 
 interface Attachment {
-  id: string
-  kind: string
-  mimeType: string
-  path: string
-  transcript?: string
-  description?: string
-  durationSec?: number
-  bytes?: number
+  id: string;
+  kind: string;
+  mimeType: string;
+  path: string;
+  transcript?: string;
+  description?: string;
+  durationSec?: number;
+  bytes?: number;
 }
 
 interface Message {
-  id: string
-  whatsappMsgId: string
-  fromName: string
-  fromNumber: string
-  type: string
-  text?: string
-  sentAt: string
-  attachments: Attachment[]
+  id: string;
+  whatsappMsgId: string;
+  fromName: string;
+  fromNumber: string;
+  type: string;
+  text?: string;
+  sentAt: string;
+  attachments: Attachment[];
   repliedMessage?: {
-    fromName: string
-    type: string
-    text?: string
-  }
+    fromName: string;
+    type: string;
+    text?: string;
+  };
 }
 
 interface MessageBubbleProps {
-  message: Message
-  previousMessage?: Message
+  message: Message;
+  previousMessage?: Message;
 }
 
-export function MessageBubble({ message, previousMessage }: MessageBubbleProps) {
-  const isSameAuthor = previousMessage?.fromNumber === message.fromNumber
-  const showAvatar = !isSameAuthor
+export function MessageBubble({
+  message,
+  previousMessage,
+}: MessageBubbleProps) {
+  const isSameAuthor = previousMessage?.fromNumber === message.fromNumber;
+  const showAvatar = !isSameAuthor;
 
   const getInitials = (name: string) => {
     return name
@@ -47,15 +51,15 @@ export function MessageBubble({ message, previousMessage }: MessageBubbleProps) 
       .map((word) => word[0])
       .join("")
       .toUpperCase()
-      .slice(0, 2)
-  }
+      .slice(0, 2);
+  };
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString("pt-BR", {
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
 
   // Reaction messages
   if (message.type === "reaction") {
@@ -65,7 +69,7 @@ export function MessageBubble({ message, previousMessage }: MessageBubbleProps) 
         <span>reagiu com</span>
         <span className="text-2xl">{message.text}</span>
       </div>
-    )
+    );
   }
 
   return (
@@ -83,15 +87,22 @@ export function MessageBubble({ message, previousMessage }: MessageBubbleProps) 
 
       {/* Message Content */}
       <div className="flex-1 max-w-[70%]">
-        {showAvatar && <div className="text-sm font-semibold text-foreground mb-1">{message.fromName}</div>}
+        {showAvatar && (
+          <div className="text-sm font-semibold text-foreground mb-1">
+            {message.fromName}
+          </div>
+        )}
 
         <div className="bg-chat-bubble-received rounded-2xl rounded-tl-sm p-3 shadow-sm">
           {/* Reply Preview */}
           {message.repliedMessage && (
             <div className="mb-2 pl-3 border-l-4 border-primary bg-muted/30 rounded p-2">
-              <div className="text-xs font-semibold text-primary mb-1">{message.repliedMessage.fromName}</div>
+              <div className="text-xs font-semibold text-primary mb-1">
+                {message.repliedMessage.fromName}
+              </div>
               <div className="text-xs text-muted-foreground line-clamp-2">
-                {message.repliedMessage.text || `[${message.repliedMessage.type}]`}
+                {message.repliedMessage.text ||
+                  `[${message.repliedMessage.type}]`}
               </div>
             </div>
           )}
@@ -103,67 +114,88 @@ export function MessageBubble({ message, previousMessage }: MessageBubbleProps) 
 
           {/* Text */}
           {message.text && (
-            <div className="text-sm text-foreground whitespace-pre-wrap break-words">{message.text}</div>
+            <div className="text-sm text-foreground whitespace-pre-wrap break-words">
+              {message.text}
+            </div>
           )}
 
           {/* Time */}
-          <div className="text-xs text-muted-foreground mt-1 text-right">{formatTime(message.sentAt)}</div>
+          <div className="text-xs text-muted-foreground mt-1 text-right">
+            {formatTime(message.sentAt)}
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false);
+  const auth = getAuthFromUrl();
+  const fileUrl = `/api/proxy/files/${
+    attachment.path
+  }?auth=${encodeURIComponent(auth || "")}`;
 
   const formatDuration = (seconds?: number) => {
-    if (!seconds) return "0:00"
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, "0")}`
-  }
+    if (!seconds) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const formatBytes = (bytes?: number) => {
-    if (!bytes) return "0 B"
-    const k = 1024
-    const sizes = ["B", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
-  }
+    if (!bytes) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+  };
 
   // Image
-  if (attachment.kind === "image" || attachment.mimeType?.startsWith("image/")) {
+  if (
+    attachment.kind === "image" ||
+    attachment.mimeType?.startsWith("image/")
+  ) {
     return (
       <div className="mb-2 rounded-lg overflow-hidden">
         <img
-          src={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
-            (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
-          )}`}
+          src={fileUrl}
           alt={attachment.description || "Image"}
           className="max-w-full h-auto max-h-96 object-contain"
         />
-        {attachment.description && <div className="text-xs text-muted-foreground mt-1">{attachment.description}</div>}
+        {attachment.description && (
+          <div className="text-xs text-muted-foreground mt-1">
+            {attachment.description}
+          </div>
+        )}
       </div>
-    )
+    );
   }
 
   // Video
-  if (attachment.kind === "video" || attachment.mimeType?.startsWith("video/")) {
+  if (
+    attachment.kind === "video" ||
+    attachment.mimeType?.startsWith("video/")
+  ) {
     return (
       <div className="mb-2 rounded-lg overflow-hidden">
-        <video controls className="max-w-full h-auto max-h-96" src={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
-          (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
-        )}`}>
+        <video controls className="max-w-full h-auto max-h-96" src={fileUrl}>
           Seu navegador não suporta vídeo.
         </video>
-        {attachment.description && <div className="text-xs text-muted-foreground mt-1">{attachment.description}</div>}
+        {attachment.description && (
+          <div className="text-xs text-muted-foreground mt-1">
+            {attachment.description}
+          </div>
+        )}
       </div>
-    )
+    );
   }
 
   // Audio
-  if (attachment.kind === "audio" || attachment.mimeType?.startsWith("audio/")) {
+  if (
+    attachment.kind === "audio" ||
+    attachment.mimeType?.startsWith("audio/")
+  ) {
     return (
       <div className="mb-2 bg-muted/30 rounded-lg p-3">
         <div className="flex items-center gap-3">
@@ -176,19 +208,23 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <Music className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <div className="text-sm font-medium text-foreground truncate">Áudio</div>
+              <div className="text-sm font-medium text-foreground truncate">
+                Áudio
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground">{formatDuration(attachment.durationSec)}</div>
+            <div className="text-xs text-muted-foreground">
+              {formatDuration(attachment.durationSec)}
+            </div>
           </div>
-          <audio src={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
-            (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
-          )}`} className="hidden" />
+          <audio src={fileUrl} className="hidden" />
         </div>
         {attachment.transcript && (
-          <div className="text-xs text-muted-foreground italic mt-2">&ldquo;{attachment.transcript}&rdquo;</div>
+          <div className="text-xs text-muted-foreground italic mt-2">
+            &ldquo;{attachment.transcript}&rdquo;
+          </div>
         )}
       </div>
-    )
+    );
   }
 
   // Document
@@ -202,12 +238,12 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
           <div className="text-sm font-medium text-foreground truncate">
             {attachment.path.split("/").pop() || "Documento"}
           </div>
-          <div className="text-xs text-muted-foreground">{formatBytes(attachment.bytes)}</div>
+          <div className="text-xs text-muted-foreground">
+            {formatBytes(attachment.bytes)}
+          </div>
         </div>
-      <a
-        href={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
-          (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
-        )}`}
+        <a
+          href={fileUrl}
           download
           className="flex-shrink-0 p-2 hover:bg-muted rounded-lg transition-colors"
         >
@@ -215,8 +251,10 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
         </a>
       </div>
       {attachment.description && (
-        <div className="text-xs text-muted-foreground mt-2">{attachment.description}</div>
+        <div className="text-xs text-muted-foreground mt-2">
+          {attachment.description}
+        </div>
       )}
     </div>
-  )
+  );
 }
