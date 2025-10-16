@@ -1,16 +1,7 @@
 "use client"
 
 import axios from "axios"
-
-function getAuthFromUrl(): string | null {
-  if (typeof window === "undefined") return null
-  try {
-    const url = new URL(window.location.href)
-    return url.searchParams.get("auth")
-  } catch {
-    return null
-  }
-}
+import { getAuthFromUrl } from "@/lib/auth"
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -24,5 +15,4 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
-
 

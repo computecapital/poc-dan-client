@@ -137,7 +137,9 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
     return (
       <div className="mb-2 rounded-lg overflow-hidden">
         <img
-          src={`${process.env.NEXT_PUBLIC_API_URL}/files/${attachment.path}`}
+          src={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
+            (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
+          )}`}
           alt={attachment.description || "Image"}
           className="max-w-full h-auto max-h-96 object-contain"
         />
@@ -150,7 +152,9 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
   if (attachment.kind === "video" || attachment.mimeType?.startsWith("video/")) {
     return (
       <div className="mb-2 rounded-lg overflow-hidden">
-        <video controls className="max-w-full h-auto max-h-96" src={`${process.env.NEXT_PUBLIC_API_URL}/files/${attachment.path}`}>
+        <video controls className="max-w-full h-auto max-h-96" src={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
+          (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
+        )}`}>
           Seu navegador não suporta vídeo.
         </video>
         {attachment.description && <div className="text-xs text-muted-foreground mt-1">{attachment.description}</div>}
@@ -176,7 +180,9 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
             </div>
             <div className="text-xs text-muted-foreground">{formatDuration(attachment.durationSec)}</div>
           </div>
-          <audio src={`${process.env.NEXT_PUBLIC_API_URL}/files/${attachment.path}`} className="hidden" />
+          <audio src={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
+            (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
+          )}`} className="hidden" />
         </div>
         {attachment.transcript && (
           <div className="text-xs text-muted-foreground italic mt-2">&ldquo;{attachment.transcript}&rdquo;</div>
@@ -198,8 +204,10 @@ function AttachmentRenderer({ attachment }: { attachment: Attachment }) {
           </div>
           <div className="text-xs text-muted-foreground">{formatBytes(attachment.bytes)}</div>
         </div>
-        <a
-          href={`${process.env.NEXT_PUBLIC_API_URL}/files/${attachment.path}`}
+      <a
+        href={`/api/proxy/files/${attachment.path}?auth=${encodeURIComponent(
+          (typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("auth") : "") || ""
+        )}`}
           download
           className="flex-shrink-0 p-2 hover:bg-muted rounded-lg transition-colors"
         >
