@@ -37,12 +37,8 @@ export function ConversationList({ selectedGroupId, onSelectGroup }: Conversatio
   useEffect(() => {
     const socket = getSocket()
 
-    const handleGroupCreated = (group: Group) => {
-      setGroups((prev) => {
-        if (prev.some((g) => g.id === group.id)) return prev
-        // Inserir no topo com leve destaque natural pelo updatedAt
-        return [group, ...prev]
-      })
+    const handleGroupCreated = () => {
+      fetchGroups();
     }
 
     const handleMessageCreated = (payload: { groupId: string }) => {
@@ -145,7 +141,7 @@ export function ConversationList({ selectedGroupId, onSelectGroup }: Conversatio
                       })}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">{group._count.messages} mensagens</p>
+                  <p className="text-sm text-muted-foreground truncate">{group._count?.messages} mensagens</p>
                 </div>
               </button>
             ))}
