@@ -38,21 +38,24 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.78 0.12 230);
+  /* Chat bubble defaults (light) */
+  --chat-bubble-bg: oklch(0.97 0 0);
+  --chat-bubble-border: oklch(0.9 0 0);
 }
 
 .dark {
   /* Dark mode theme */
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.22 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
+  --card: oklch(0.18 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
+  --popover: oklch(0.18 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.28 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(0.26 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.62 0.14 190);
   --accent-foreground: oklch(0.985 0 0);
@@ -66,7 +69,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.18 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -74,6 +77,9 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.55 0.14 230);
+  /* Chat bubble in dark */
+  --chat-bubble-bg: oklch(0.28 0 0);
+  --chat-bubble-border: oklch(0.36 0 0);
 }
 
 @theme inline {
@@ -131,11 +137,20 @@
     background-repeat: no-repeat;
   }
   .dark body {
-    /* Dark mode variant of the subtle gradients */
-    background-image:
-      radial-gradient(900px 540px at 15% -10%, oklch(0.45 0.10 230 / 0.18), transparent 60%),
-      radial-gradient(700px 440px at 110% 10%, oklch(0.48 0.10 180 / 0.14), transparent 60%);
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    background-image: none;
+  }
+}
+
+@layer utilities {
+  .bg-chat-bubble {
+    background-color: var(--chat-bubble-bg);
+  }
+  .border-chat-bubble {
+    border-color: var(--chat-bubble-border);
+  }
+  .shadow-chat-bubble {
+    box-shadow:
+      0 8px 24px oklch(0 0 0 / 0.35),
+      inset 0 1px 0 oklch(1 0 0 / 0.04);
   }
 }

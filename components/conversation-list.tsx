@@ -90,7 +90,7 @@ export function ConversationList({ selectedGroupId, onSelectGroup }: Conversatio
   }
 
   return (
-    <div className="w-full md:w-96 border-r border-border flex flex-col bg-sidebar-bg">
+    <div className="w-full md:w-96 border-r border-border flex flex-col bg-sidebar">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <h1 className="text-2xl font-semibold mb-4 text-foreground">Conversas</h1>

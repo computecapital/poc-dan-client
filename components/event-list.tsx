@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getSocket } from "@/lib/socket"
 import { api } from "@/lib/api"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -76,10 +76,15 @@ export function EventList({ groupId }: EventListProps) {
   const [statusSavedTick, setStatusSavedTick] = useState<Record<string, boolean>>({})
   const [statusSavedTickLeaving, setStatusSavedTickLeaving] = useState<Record<string, boolean>>({})
   const [historyOpen, setHistoryOpen] = useState<Record<string, boolean>>({})
+  const historyOpenRef = useRef<Record<string, boolean>>({})
 
   useEffect(() => {
     fetchEvents()
   }, [groupId, statusFilter])
+
+  useEffect(() => {
+    historyOpenRef.current = historyOpen
+  }, [historyOpen])
 
   useEffect(() => {
     const socket = getSocket()
@@ -90,9 +95,36 @@ export function EventList({ groupId }: EventListProps) {
       setEvents(resp.data.data || [])
     }
 
+    const handleEventUpdated = async (event: Event) => {
+      console.log('event:updated', event);
+      if (event.groupId !== groupId) return
+      const resp = await api.get(`/groups/${groupId}/events`, { params: { limit: 100 } })
+      setEvents(resp.data.data || [])
+      // Se o histórico desse evento estiver aberto, atualiza-o também
+      if (historyOpenRef.current[event.id]) {
+        try {
+          const historyResp = await api.get(`/events/${event.id}/status-changes`)
+          const list = historyResp.data?.data || []
+          setStatusHistory((prev) => ({ ...prev, [event.id]: list }))
+        } catch (err) {
+          console.error("[v0] Error refreshing status changes after update:", err)
+        }
+      }
+
+      setObservationsEditing((prev) => {
+        console.log(prev);
+        if (!prev[event.id]) return prev;
+
+        console.log({ ...prev, [event.id]: event.observations ?? '' });
+        return { ...prev, [event.id]: event.observations ?? '' };
+      })
+    }
+
     socket.on("event:created", handleEventCreated)
+    socket.on("event:updated", handleEventUpdated)
     return () => {
       socket.off("event:created", handleEventCreated)
+      socket.off("event:updated", handleEventUpdated)
     }
   }, [groupId])
 
@@ -127,6 +159,14 @@ export function EventList({ groupId }: EventListProps) {
       await api.patch(`/events/${eventId}`, { status: newStatus })
       setEvents((prev) => prev.map((ev) => (ev.id === eventId ? { ...ev, status: newStatus, updatedAt: new Date().toISOString() } : ev)))
       setStatusSavedTick((prev) => ({ ...prev, [eventId]: true }))
+      // Atualiza o histórico de mudanças de status imediatamente
+      try {
+        const historyResp = await api.get(`/events/${eventId}/status-changes`)
+        const list = historyResp.data?.data || []
+        setStatusHistory((prev) => ({ ...prev, [eventId]: list }))
+      } catch (err) {
+        console.error("[v0] Error refreshing status changes after status change:", err)
+      }
       // inicia saída suave pouco antes de desmontar
       setTimeout(() => {
         setStatusSavedTickLeaving((prev) => ({ ...prev, [eventId]: true }))
@@ -351,8 +391,14 @@ export function EventList({ groupId }: EventListProps) {
                   className="rounded-md border border-border bg-muted/20"
                   onToggle={(e) => {
                     const open = (e.target as HTMLDetailsElement).open
-                    if (open && observationsEditing[event.id] === undefined) {
+                    if (open) {
                       setObservationsEditing((prev) => ({ ...prev, [event.id]: event.observations || "" }))
+                    } else {
+                      setObservationsEditing((prev) => {
+                        const next = { ...prev }
+                        delete next[event.id]
+                        return next
+                      })
                     }
                   }}
                 >

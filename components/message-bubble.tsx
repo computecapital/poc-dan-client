@@ -93,7 +93,7 @@ export function MessageBubble({
           </div>
         )}
 
-        <div className="bg-chat-bubble-received rounded-2xl rounded-tl-sm p-3 shadow-sm">
+        <div className="bg-chat-bubble border border-chat-bubble rounded-2xl rounded-tl-sm p-3 shadow-chat-bubble">
           {/* Reply Preview */}
           {message.repliedMessage && (
             <div className="mb-2 pl-3 border-l-4 border-primary bg-muted/30 rounded p-2">
